@@ -1,0 +1,19 @@
+otel:
+  resource:
+    attributes:
+      service.name: my-spring-starter-app
+  traces:
+    exporter: otlp
+    sampler: parentbased_traceidratio
+    sampler.arg: 1.0
+  logs:
+    exporter: otlp
+    protocol: http/protobuf
+  exporter:
+    otlp:
+      protocol: http/protobuf
+      endpoint: http://localhost:4318
+#      traces:
+#        endpoint: http://localhost:4318
+#      logs:
+#        endpoint: http://localhost:4318

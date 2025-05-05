@@ -1,0 +1,46 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+      http:
+
+exporters:
+  debug: # Export to console for verification
+    verbosity: detailed
+  otlp/jaeger: # Example: Export traces to Jaeger running on default ports
+    endpoint: jaeger:4317 # Assumes Jaeger container named 'jaeger' is on the same Docker network
+    tls:
+      insecure: true
+  zipkin: # Example: Export traces to Zipkin
+     endpoint: http://zipkin:9411/api/v2/spans # Assumes Zipkin container named 'zipkin'
+#  otlp/loki: # Example: Export logs to Loki (requires Loki running)
+#    endpoint: loki:3100 # Assumes Loki container named 'loki'
+#    tls:
+#      insecure: true
+
+processors:
+  batch:
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: []
+      exporters: [debug, otlp/jaeger, zipkin] # Send traces to console, Jaeger and Zipkin
+    logs:
+      receivers: [otlp]
+      processors: []
+      exporters: [debug] # Send logs to console and Loki
+    metrics: # <--- 确保有这个 metrics pipeline
+      receivers: [otlp] # <--- 确保它使用 otlp 接收器
+      processors: []
+      exporters: [debug] # Send metrics to console
+  extensions: [health_check] # Optional extensions
+
+extensions:
+  health_check:
+    endpoint: "0.0.0.0:13133"
+  pprof:
+    endpoint: :1888
+  zpages:
+    endpoint: :55679
